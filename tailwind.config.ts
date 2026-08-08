@@ -70,20 +70,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
@@ -92,5 +84,21 @@ export default {
       },
     },
   },
+  // safelist para colores dinámicos usados en clases
+  safelist: [
+    "bg-emerald-100",
+    "text-emerald-600",
+    "bg-blue-100",
+    "text-blue-600",
+    "bg-purple-100",
+    "text-purple-600",
+    "bg-amber-100",
+    "text-amber-600",
+    "text-slate-700",
+    "text-emerald-700",
+    "text-blue-700",
+    "text-purple-700",
+    "text-amber-700",
+  ],
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
