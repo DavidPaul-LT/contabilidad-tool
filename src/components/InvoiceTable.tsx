@@ -9,12 +9,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
   Trash2,
   Download,
   Plus,
+  Eye,
+  FileText,
 } from "lucide-react";
 import type { InvoiceData } from "@/lib/invoiceExtractor";
 import { showSuccess } from "@/utils/toast";
@@ -36,6 +45,7 @@ export const InvoiceTable = ({
   const [sortField, setSortField] = useState<SortField>("fecha");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [filter, setFilter] = useState("");
+  const [previewInvoice, setPreviewInvoice] = useState<InvoiceData | null>(null);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -326,14 +336,26 @@ export const InvoiceTable = ({
                     />
                   </td>
                   <td className="px-2 py-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeInvoice(idx)}
-                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setPreviewInvoice(inv)}
+                        className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                        title="Ver factura original"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeInvoice(idx)}
+                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        title="Eliminar factura"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -359,6 +381,84 @@ export const InvoiceTable = ({
           </table>
         </div>
       </div>
+
+      {/* Modal de vista previa */}
+      <Dialog
+        open={!!previewInvoice}
+        onOpenChange={(open) => !open && setPreviewInvoice(null)}
+      >
+        <DialogContent className="max-w-3xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-800">
+              <FileText className="h-5 w-5 text-blue-600" />
+              Vista previa de la factura
+              {previewInvoice?.numeroFactura && (
+                <span className="text-slate-500 font-normal">
+                  · {previewInvoice.numeroFactura}
+                </span>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              Texto extraído originalmente de la factura. Úsalo como referencia
+              para corregir los datos de la tabla.
+            </DialogDescription>
+          </DialogHeader>
+
+          {previewInvoice && (
+            <div className="space-y-4">
+              {/* Resumen rápido */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <div>
+                  <p className="text-xs text-slate-500">Proveedor</p>
+                  <p className="text-sm font-semibold text-slate-800 truncate">
+                    {previewInvoice.proveedor || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">NIF</p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {previewInvoice.nif || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Fecha</p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {previewInvoice.fecha || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Total</p>
+                  <p className="text-sm font-semibold text-emerald-700">
+                    {previewInvoice.total.toFixed(2)} €
+                  </p>
+                </div>
+              </div>
+
+              {/* Texto crudo */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-slate-700">
+                    Texto extraído (OCR/PDF)
+                  </p>
+                  {previewInvoice.rawText && (
+                    <span className="text-xs text-slate-400">
+                      {previewInvoice.rawText.length} caracteres
+                    </span>
+                  )}
+                </div>
+                <div className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-auto max-h-96 font-mono text-xs leading-relaxed whitespace-pre-wrap">
+                  {previewInvoice.rawText || (
+                    <span className="text-slate-500 italic">
+                      No hay texto original disponible (esta factura fue añadida
+                      manualmente).
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
